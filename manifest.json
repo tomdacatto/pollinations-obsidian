@@ -1,0 +1,10 @@
+{
+    "id": "pollinations",
+    "name": "Pollinations",
+    "version": "0.1.0",
+    "minAppVersion": "1.0.0",
+    "description": "Generate text and images with Pollinations, right inside your notes.",
+    "author": "Pollinations community",
+    "authorUrl": "https://pollinations.ai",
+    "isDesktopOnly": false
+}
