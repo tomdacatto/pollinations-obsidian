@@ -122,7 +122,19 @@ export default class PollinationsPlugin extends Plugin {
             if (!(await this.app.vault.adapter.exists(folder))) {
                 await this.app.vault.createFolder(folder);
             }
-            const path = normalizePath(`${folder}/${Date.now()}.png`);
+            const contentType = (res.headers["content-type"] || res.headers["Content-Type"] || "")
+                .split(";")[0]
+                .toLowerCase();
+            const extension = (
+                {
+                    "image/jpeg": "jpg",
+                    "image/png": "png",
+                    "image/webp": "webp",
+                    "image/gif": "gif",
+                } as Record<string, string>
+            )[contentType];
+            if (!extension) throw new Error(`Unsupported image format: ${contentType || "unknown"}`);
+            const path = normalizePath(`${folder}/${Date.now()}.${extension}`);
             await this.app.vault.createBinary(path, res.arrayBuffer);
 
             if (selection) {
@@ -201,7 +213,7 @@ class PollinationsSettingTab extends PluginSettingTab {
             .setDesc("From https://enter.pollinations.ai/keys")
             .addText((text) =>
                 text
-                    .setPlaceholder("pk_... or sk_...")
+                    .setPlaceholder("sk_...")
                     .setValue(this.plugin.settings.apiKey)
                     .onChange(async (value) => {
                         this.plugin.settings.apiKey = value.trim();
