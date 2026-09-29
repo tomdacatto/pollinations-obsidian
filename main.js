@@ -112,7 +112,15 @@ var PollinationsPlugin = class extends import_obsidian.Plugin {
       if (!await this.app.vault.adapter.exists(folder)) {
         await this.app.vault.createFolder(folder);
       }
-      const path = (0, import_obsidian.normalizePath)(`${folder}/${Date.now()}.png`);
+      const contentType = (res.headers["content-type"] || res.headers["Content-Type"] || "").split(";")[0].toLowerCase();
+      const extension = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+        "image/gif": "gif"
+      }[contentType];
+      if (!extension) throw new Error(`Unsupported image format: ${contentType || "unknown"}`);
+      const path = (0, import_obsidian.normalizePath)(`${folder}/${Date.now()}.${extension}`);
       await this.app.vault.createBinary(path, res.arrayBuffer);
       if (selection) {
         editor.replaceSelection(`![[${path}]]`);
@@ -169,7 +177,7 @@ var PollinationsSettingTab = class extends import_obsidian.PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     new import_obsidian.Setting(containerEl).setName("API key").setDesc("From https://enter.pollinations.ai/keys").addText(
-      (text) => text.setPlaceholder("pk_... or sk_...").setValue(this.plugin.settings.apiKey).onChange(async (value) => {
+      (text) => text.setPlaceholder("sk_...").setValue(this.plugin.settings.apiKey).onChange(async (value) => {
         this.plugin.settings.apiKey = value.trim();
         await this.plugin.saveSettings();
       })
